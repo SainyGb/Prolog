@@ -1,0 +1,31 @@
+conhece(john, saily).
+conhece(jennifer, john).
+conhece(jennifer, saily).
+conhece(jennifer, ann).
+conhece(jennifer, melissa).
+conhece(jennifer, mark).
+conhece(joe, mark).
+conhece(joe, diana).
+conhece(ann, dan).
+
+trabalha(john, xyz).
+trabalha(saily, xyz).
+trabalha(jennifer, neo4j).
+trabalha(ann, abc).
+trabalha(dan, abc).
+trabalha(melissa, x).
+trabalha(diana, y).
+
+gosta(john, java).
+gosta(jennifer, java).
+gosta(mark, grafos).
+gosta(diana, grafos).
+gosta(jennife, grafos).
+gosta(melissa, grafos).
+gosta(melissa, query).
+gosta(diana, query).
+gosta(dan, dataetl).
+gosta(dan, integração).
+gosta(ann, aplicação).
+gosta(john, aplicação).
+
