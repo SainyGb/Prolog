@@ -12,3 +12,6 @@ ande(Destino) :- pos(_, Destino),
                  format('Robo andou de ~w para ~w', [Origem, Destino]).
 
 estou :- listing(pos(robo,_)).
+
+objetos :- findall(Local, pos(robo, Local), Result),
+           format("Objetos: ~w", [Result]).
