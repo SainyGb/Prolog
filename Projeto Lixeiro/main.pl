@@ -20,7 +20,7 @@ aresta(10,10,22).
 aresta(1,2,21).
 aresta(2,3,1).
 aresta(3,1,2).
-aresta(1,3,20).
+aresta(1,3,22).
 
 /*DIJKSTRA*/
 
@@ -169,9 +169,11 @@ posto_proximo :- pos(Atual),
                 pegar_cauda(Result, Cauda),
                 posto_proximo(Cauda).
 
-posto_proximo([]) :- peso_temp(Vertice, _),
+posto_proximo([]) :-peso_temp(Vertice, _),
                     retract(peso_temp(_,_)),
+                    asserta(peso_temp(Vertice,100000)),
                     format("O posto mais proximo eh: ~w", [Vertice]).
+                    
 
 posto_proximo(Lista) :- pos(Atual),
                 pegar_cabeca(Lista, Cabeca),
@@ -192,6 +194,14 @@ posto_proximo(Lista) :- pos(Atual),
                 MenorPeso >= PesoAnterior,
                 pegar_cauda(Lista, Cauda),
                 posto_proximo(Cauda).
+
+ir_posto_proximo :- pos(Atual),
+                    peso_temp(Vertice, _),
+                    retract(peso_temp(_,_)),
+                    asserta(peso_temp(0,100000)),
+                    asserta(pos_memoria(Atual)),
+                    ir(Vertice,_,_),
+                    format("O lixeiro se moveu para o posto ~w", [Vertice]).
 
 rota :- pos(X),
         divide_pair(X, Cost, Path),
