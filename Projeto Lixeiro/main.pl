@@ -17,15 +17,15 @@ aresta(10,10,22).
 */
 
 
-aresta(1,2,10).
+aresta(1,2,21).
 aresta(2,3,1).
 aresta(3,1,2).
-
+aresta(1,3,20).
 
 /*DIJKSTRA*/
 
 connected(X, Y, Peso) :- aresta(X, Y, Peso).
-connected(X, Y, Peso) :- aresta(Y, X, Peso).
+/*connected(X, Y, Peso) :- aresta(Y, X, Peso).*/
 
 adjacente(X, Y) :- connected(X, Y, _).
 
@@ -113,22 +113,25 @@ pegar_cauda([_|Cauda], Cauda).
 /*MAIN*/
 :- dynamic pos/1.
 :- dynamic pos_memoria/1.
+:- dynamic peso_temp/2.
 
 :- dynamic lixo/2.
 
 :- dynamic mochila/2.
+:- dynamic energia/2.
 
-
+peso_temp(0,100000).
 
 lixo(2,3).
 
 lixao(1).
-ponto_recarga(2).
+posto_recarga(2).
+posto_recarga(3).
 
 pos(1).
 
 mochila(0,2).
-
+energia(10,10).
 
 estado_mochila :- mochila(Qtd_Lixo,Limite_Mochila),
                     format("A mochila tem ~w/~w",[Qtd_Lixo, Limite_Mochila]), !.
@@ -156,6 +159,40 @@ retornar_rota :- pos_memoria(Ultima),
                 ir(Ultima,_,_),
                 format("O lixeiro retornou para o local ~w", [Ultima]).
 
+posto_proximo :- pos(Atual),
+                findall(Postos, posto_recarga(Postos), Result),
+                pegar_cabeca(Result, Cabeca),
+                findall(Posto, caminho(Atual,Cabeca,_,Posto), List),
+	            min_list(List,MenorPeso),
+                retract(peso_temp(_,_)),
+                asserta(peso_temp(Cabeca, MenorPeso)),
+                pegar_cauda(Result, Cauda),
+                posto_proximo(Cauda).
+
+posto_proximo([]) :- peso_temp(Vertice, _),
+                    retract(peso_temp(_,_)),
+                    format("O posto mais proximo eh: ~w", [Vertice]).
+
+posto_proximo(Lista) :- pos(Atual),
+                pegar_cabeca(Lista, Cabeca),
+                findall(Posto, caminho(Atual,Cabeca,_,Posto), List),
+	            min_list(List,MenorPeso),
+                peso_temp(_, PesoAnterior),
+                MenorPeso < PesoAnterior,
+                retract(peso_temp(_,_)),
+                asserta(peso_temp(Cabeca, MenorPeso)),
+                pegar_cauda(Lista, Cauda),
+                posto_proximo(Cauda).
+
+posto_proximo(Lista) :- pos(Atual),
+                pegar_cabeca(Lista, Cabeca),
+                findall(Posto, caminho(Atual,Cabeca,_,Posto), List),
+	            min_list(List,MenorPeso),
+                peso_temp(_, PesoAnterior),
+                MenorPeso >= PesoAnterior,
+                pegar_cauda(Lista, Cauda),
+                posto_proximo(Cauda).
+
 rota :- pos(X),
         divide_pair(X, Cost, Path),
         Cost < 100000,
@@ -166,9 +203,36 @@ seguir_rota :- pos(X),
                 Cost < 100000,
                 pegar_cauda(Path, Cauda),
                 pegar_cabeca(Cauda, Cabeca),
+                aresta(X,Cabeca, Edge_Cost),
+                energia(Energia_Atual,Limite),
+                Edge_Cost =< Energia_Atual,
+                Perda is Energia_Atual - Edge_Cost,
+                retract(energia(_,_)),
+                asserta(energia(Perda, Limite)),
                 retract(pos(X)),
                 asserta(pos(Cabeca)),
                 format("O lixeiro se moveu da pos ~w para a pos ~w", [X,Cabeca]).
+
+seguir_rota :- pos(X),
+                divide_pair(X, Cost, Path),
+                Cost < 100000,
+                pegar_cauda(Path, Cauda),
+                pegar_cabeca(Cauda, Cabeca),
+                aresta(X,Cabeca, Edge_Cost),
+                energia(Energia_Atual,_),
+                Edge_Cost > Energia_Atual,
+                write("Pouca energia, favor ir ate um posto de recarga com as baterias reservas.").
+
+
+recarregar :- pos(X),
+                posto_recarga(X),
+                energia(_, Limite),
+                retract(energia(_, _)),
+                asserta(energia(Limite, Limite)),
+                format("Energia recarregada: ~w/~w", [Limite,Limite]).
+
+mostrar_energia :- energia(Atual,Limite),
+                    format("Energia: ~w/~w", [Atual, Limite]).
 
 lixo_local :- pos(Atual),
                 lixo(Atual,Lixo),
